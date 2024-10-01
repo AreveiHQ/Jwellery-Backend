@@ -1,0 +1,3 @@
+const JWT_SECRET="YOUNEVERGETXXXXX";
+
+module.exports = {JWT_SECRET}
