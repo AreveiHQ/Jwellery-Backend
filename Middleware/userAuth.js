@@ -7,7 +7,7 @@ const userAuth = (req,res,next)=>{
     
     if(!head_token || !head_token.startsWith("Bearer")){
         return res.status(403).json({
-            meassage:"Invalid Token"
+            message:"Invalid Token"
         })
     }
 
