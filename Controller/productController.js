@@ -1,5 +1,7 @@
 const Product = require('../model/productModel');
 const cloudinary = require('cloudinary').v2;
+const {applyDiscount}=require("../utils/productDiscount");
+
 const subCategories = {
   men: ['shirts', 'trousers', 'shoes'],
   women: ['dresses', 'handbags', 'shoes'],
@@ -10,6 +12,7 @@ cloudinary.config({
   api_key: '937132914545171',
   api_secret: 'YqFVbh9ZLliHcMTc9Fu6BrbstD4',
 });
+
 exports.getAllProducts = async (req, res) => {
   try {
     const products = await Product.find().sort({ createdAt: -1 });
@@ -125,12 +128,15 @@ exports.createProduct = async (req, res) => {
             folder:"Jwellery/products"
     }).then(result=>({result})).catch(error=>({error,filePath:file.path}))
 )
+ const discountPrice=applyDiscount(price,5);
+
 const results = await Promise.all(uploadPromises);
 const images = results.map(({result})=>result.secure_url);
   const product = new Product({
     name,
     description,
     price,
+    discountPrice,
     category: category.toLowerCase(),
     subCategory: subCategory.toLowerCase(),
     brand,
