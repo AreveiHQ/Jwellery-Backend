@@ -2,16 +2,16 @@
 const Order = require('../model/orderModel');
 const Cart = require('../model/cartModel');
 
-// Create an Order
+
 exports.createOrder = async (req, res) => {
   try {
-    const { paymentId, address, amount, orderId,signature } = req.body;
-
-    // Fetch items from the user's cart
+    const { paymentId, address, amount, orderId, signature } = req.body;
     const userId = req.userId;
-    const cartItems = await Cart.findOne({ userId: userId });
 
-    if (!cartItems) {
+   
+    const cart = await Cart.findOne({ userId }).populate('items.productId');
+
+    if (!cart) {
       return res.status(404).json({ message: 'Cart not found' });
     }
 
@@ -20,21 +20,23 @@ exports.createOrder = async (req, res) => {
       order = new Order({ userId, orders: [] });
     }
 
+    
     order.orders.push({
-      items: cartItems,
+      items: cart.items.map(item => ({
+        productId: item.productId._id, // Reference productId, not the entire product data
+        quantity: item.quantity,
+      })),
       paymentStatus: 'confirmed',
       paymentId,
       address,
       orderStatus: 'confirmed',
-      amount: amount,
+      amount,
       signature,
-      orderId
-    })
-
+      orderId,
+    });
 
     await order.save();
-
-    await Cart.findOneAndDelete({userId});
+    await Cart.findOneAndDelete({ userId }); // Remove cart after placing order
 
     res.status(201).json(order);
   } catch (error) {
@@ -42,6 +44,7 @@ exports.createOrder = async (req, res) => {
     res.status(500).json({ message: 'Server error' });
   }
 };
+
 
 
 exports.getOrders = async (req, res) => {
@@ -62,7 +65,7 @@ exports.getOrders = async (req, res) => {
   }
 };
 
-// Update Order Status
+
 exports.updateOrderStatus = async (req, res) => {
   try {
     const { orderId } = req.params;
