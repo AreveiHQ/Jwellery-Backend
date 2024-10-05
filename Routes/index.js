@@ -14,6 +14,7 @@ router.use("/admin",adminRouter);
 router.use("/home",homeRouter);
 router.use("/cart",cartRouter);
 router.use("/orders",orderRouter);
-router.use("/payment",paymentRouter);
+router.use("/payment", paymentRouter);
+
 
 module.exports = router;
