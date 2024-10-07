@@ -1,6 +1,6 @@
 const Cart = require('../model/cartModel');
 
-// Create a new cart for a user
+
 const createCart = async (req, res) => {
     const { userId } = req.user;
     try {
@@ -15,7 +15,7 @@ const createCart = async (req, res) => {
     }
 };
 
-// Add a product to the cart
+
 const addToCart = async (req, res) => {
     const userId = req.userId;
     const { productId, img_src, name, price, quantity } = req.body;
@@ -66,38 +66,39 @@ const removeProductCart = async (req, res) => {
 };
 
 // Get the cart for a user
+// Fetch cart with populated product details
 const getCart = async (req, res) => {
     const userId = req.userId;
-
+  
     try {
-        const cart = await Cart.findOne({ userId }).populate('items.productId');
-        if (!cart) {
-            return res.status(404).json({ message: 'Cart not found' });
-        }
-        res.status(200).json(cart);
+      const cart = await Cart.findOne({ userId }).populate('items.productId'); // Populate productId with details from Product collection
+      if (!cart) {
+        return res.status(404).json({ message: 'Cart not found' });
+      }
+      res.status(200).json(cart);
     } catch (error) {
-        res.status(500).json({ error: 'Server error while fetching cart' });
+      res.status(500).json({ error: 'Server error while fetching cart' });
     }
-};
+  };
+  
 
-const getCartPrice = async (req,res)=>{
-    const userId=req.userId;
-    try{
-        const cart = await Cart.findOne({ userId }).populate('items.productId');
-        if (!cart) {
-            return res.status(404).json({ message: 'Cart not found' });
-        }
-
-        const items = cart.items;
-        const total = items.reduce((acc, item) => acc + item.price * item.quantity, 0).toFixed(2);
-        res.json({
-            total
-        })
+  const getCartPrice = async (req, res) => {
+    const userId = req.userId;
+    try {
+      const cart = await Cart.findOne({ userId }).populate('items.productId');
+      if (!cart) {
+        return res.status(404).json({ message: 'Cart not found' });
+      }
+  
+      const total = cart.items.reduce((acc, item) => acc + item.productId.price * item.quantity, 0).toFixed(2);
+  
+      res.json({ total });
+    } catch (error) {
+      console.log(error);
+      res.status(500).json({ error: 'Server error' });
     }
-    catch(err){
-        console.log(err);
-    }
-}
+  };
+  
 
 module.exports = {
     createCart,
